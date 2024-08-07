@@ -2,10 +2,10 @@ from datetime import datetime
 
 from random import randrange
 
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Подключаем БД SQLite:
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -31,17 +31,19 @@ class Opinion(db.Model):
 
 @app.route('/')
 def index_view():
-    # Определяется количество мнений в базе данных:
     quantity = Opinion.query.count()
-    # Если мнений нет...
     if not quantity:
-        # ...то возвращается сообщение:
-        return 'В базе данных мнений о фильмах нет.'
-    # Иначе выбирается случайное число в диапазоне от 0 до quantity...
+        return 'В базе данных записей нет.'
     offset_value = randrange(quantity)
-    # ...и определяется случайный объект:
     opinion = Opinion.query.offset(offset_value).first()
-    return opinion.text
+    # Тут подключаем шаблон opinion.html:
+    return render_template('opinion.html', opinion=opinion)
+
+
+@app.route('/add')
+def add_opinion_view():
+    # Тут подключаем шаблон add_opinion.html:
+    return render_template('add_opinion.html')
 
 
 if __name__ == '__main__':
